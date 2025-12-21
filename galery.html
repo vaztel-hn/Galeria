@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>JV | Galería</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos Generales y Reset */
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.5s ease, color 0.5s ease;
+      position: relative;
+    }
+
+    .main-container {
+      max-width: 1300px; /* Un poco más ancho para el estilo masonry */
+      margin: 0 auto;
+      padding: 0 40px; 
+      flex: 1;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* --- Encabezado --- */
+    header {
+      padding: 60px 0 20px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 40px;
+    }
+    header .top-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        color: #888;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      margin: 0 0 10px 0;
+      line-height: 1.1;
+    }
+
+    /* --- Búsqueda --- */
+    .search-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+    .search-container { position: relative; display: flex; align-items: center; }
+    #searchInput {
+        width: 40px; height: 40px; 
+        padding: 0 0 0 40px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #fff;
+        cursor: pointer;
+    }
+    #searchInput.expanded { width: 280px; padding-left: 45px; cursor: text; border-color: #aaa; }
+    .search-icon { position: absolute; left: 12px; pointer-events: none; }
+    .search-icon svg { width: 20px; height: 20px; fill: #999; }
+
+    /* ⭐ GALERÍA MASONRY RECORREGIDA ⭐ */
+    .gallery {
+      column-count: 3; /* Tres columnas */
+      column-gap: 25px;
+      padding-bottom: 60px;
+    }
+    
+    .gallery-item {
+      break-inside: avoid; /* Evita que la tarjeta se parta entre columnas */
+      margin-bottom: 25px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      opacity: 0;
+      animation: fadeInCard 0.8s ease forwards;
+    }
+
+    @keyframes fadeInCard {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .gallery-item:hover { 
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: auto; /* ⭐ Altura automática para mostrar foto completa ⭐ */
+      display: block;
+      transition: filter 0.4s ease;
+    }
+
+    .meta-content {
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .item-title { font-weight: 600; font-size: 0.9rem; color: #444; }
+    .like-container { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; }
+    .like-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #bbb; transition: 0.3s; }
+    .like-btn.liked { color: #e74c3c; }
+
+    /* --- Lightbox --- */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .lightbox img {
+      max-width: 85%;
+      max-height: 75vh;
+      border-radius: 8px;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+
+    /* ⭐ BOTÓN CERRAR AJUSTADO ⭐ */
+    .close {
+        position: absolute;
+        top: 40px; 
+        right: 60px; /* Movido un poco más a la izquierda como pediste */
+        font-size: 1.8rem;
+        color: #fff;
+        cursor: pointer;
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+    }
+    .close:hover { background: #fff; color: #000; transform: rotate(90deg); }
+
+    .info { margin-top: 25px; text-align: center; color: #fff; }
+    .toggle-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 20px;
+      color: #fff;
+      border-radius: 20px;
+      cursor: pointer;
+      margin: 0 5px;
+      font-size: 0.8rem;
+    }
+
+    /* --- Dark Mode --- */
+    .dark-mode { background-color: #121212; color: #e0e0e0; }
+    .dark-mode .gallery-item { background: #1e1e1e; }
+    .dark-mode .item-title { color: #bbb; }
+    .dark-mode #searchInput { background: #222; border-color: #333; color: #fff; }
+
+    .darkmode-btn {
+      position: fixed; bottom: 30px; right: 30px;
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #333; color: #fff; border: none; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 100;
+    }
+
+    .bw-photo { filter: grayscale(100%); }
+    .hidden { display: none; }
+
+    /* Responsive */
+    @media (max-width: 1000px) { .gallery { column-count: 2; } }
+    @media (max-width: 600px) { 
+        .gallery { column-count: 1; }
+        .close { right: 20px; top: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-container">
+  <header>
+    <div class="top-meta">
+      <span>Diseño Curado</span>
+      <span>JV | Portfolio Visual</span>
+    </div>
+    <h1>Capturando el mundo, un frame a la vez</h1>
+    <p>Explora mi colección personal de fotografía y momentos.</p>
+    
+    <div class="search-row">
+      <div class="search-container">
+        <span class="search-icon">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </span>
+        <input type="text" id="searchInput" placeholder="" aria-label="Buscar">
+      </div>
+    </div>
+  </header>
+
+  <section class="gallery" id="gallery">
+    <div class="gallery-item">
+      <img src="img/foto1.jpg" alt="Foto 1" data-text="Instante de claridad" data-date="14/12/2025" data-audio="audio/1.mp3">
+      <div class="meta-content">
+          <span class="item-title">Perspectiva I</span>
+          <div class="like-container">
+            <button class="like-btn">&#9825;</button> 
+            <span class="like-count">0</span>
+          </div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="img/foto2.jpg" alt="Foto 2" data-text="Montañas al amanecer" data-date="14/12/2025" data-audio="audio/miCancion.mp3">
+      <div class="meta-content">
+          <span class="item-title">Alturas Sagradas</span>
+          <div class="like-container">
+            <button class="like-btn">&#9825;</button>
+            <span class="like-count">0</span>
+          </div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="img/foto4.jpg" alt="Foto 3" data-text="Luces urbanas" data-date="15/12/2025" data-audio="audio/miCancion.mp3">
+      <div class="meta-content">
+          <span class="item-title">Metrópolis Nocturna</span>
+          <div class="like-container">
+            <button class="like-btn">&#9825;</button>
+            <span class="like-count">0</span>
+          </div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="img/foto5.jpg" alt="Foto 4" data-text="Arquitectura moderna" data-date="16/12/2025" data-audio="audio/miCancion.mp3">
+      <div class="meta-content">
+          <span class="item-title">Líneas y Sombras</span>
+          <div class="like-container">
+            <button class="like-btn">&#9825;</button>
+            <span class="like-count">0</span>
+          </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<button class="darkmode-btn" id="darkBtn" onclick="toggleDarkMode()">&#9790;</button>
+
+<div class="lightbox" id="lightbox">
+  <span class="close" id="closeBtn">&times;</span>
+  <img id="lightbox-img" src="" alt="">
+  <div class="info" id="lightbox-info">
+    <div id="lightbox-text" style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 5px;"></div>
+    <div id="lightbox-date" style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 15px;"></div>
+    <button class="toggle-btn" id="bnBtn" onclick="toggleBW()">Blanco & Negro</button>
+    <button class="toggle-btn" id="muteBtn" style="display:none;">🔈</button>
+  </div>
+</div>
+
+<footer style="text-align: center; padding: 40px; font-size: 0.8rem; opacity: 0.6;">
+  © 2025 Creado por Jose Vasquez
+</footer>
+
+<script>
+    const body = document.body;
+    const gallery = document.getElementById('gallery');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxText = document.getElementById('lightbox-text');
+    const lightboxDate = document.getElementById('lightbox-date');
+    const closeBtn = document.getElementById('closeBtn');
+    const audioPlayer = new Audio();
+    const muteBtn = document.getElementById('muteBtn');
+    const searchInput = document.getElementById('searchInput');
+    let currentIndex = 0;
+
+    function getItems() { return Array.from(document.querySelectorAll('.gallery-item:not(.hidden)')); }
+
+    function showImage(index) {
+      const items = getItems();
+      if (items.length === 0) return;
+      if (index < 0) index = items.length - 1; 
+      if (index >= items.length) index = 0; 
+      currentIndex = index;
+
+      const img = items[currentIndex].querySelector('img');
+      lightboxImg.src = img.src;
+      lightboxText.textContent = img.getAttribute('data-text');
+      lightboxDate.textContent = img.getAttribute('data-date');
+
+      // Audio
+      const audioSrc = img.getAttribute('data-audio');
+      if (audioSrc) {
+        audioPlayer.src = audioSrc;
+        audioPlayer.muted = true;
+        audioPlayer.play().catch(() => {});
+        muteBtn.style.display = 'inline-block';
+        muteBtn.textContent = '🔈';
+      } else {
+        audioPlayer.pause();
+        muteBtn.style.display = 'none';
+      }
+    }
+
+    // Filtro y búsqueda
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const text = item.innerText.toLowerCase() + item.querySelector('img').getAttribute('data-text').toLowerCase();
+            item.classList.toggle('hidden', !text.includes(term));
+        });
+        searchInput.classList.toggle('expanded', term.length > 0);
+    });
+
+    searchInput.addEventListener('focus', () => searchInput.classList.add('expanded'));
+    searchInput.addEventListener('blur', () => { if(searchInput.value === "") searchInput.classList.remove('expanded'); });
+
+    // Eventos
+    gallery.addEventListener('click', (e) => {
+      const item = e.target.closest('.gallery-item');
+      if (!item || e.target.classList.contains('like-btn')) return;
+      const items = getItems();
+      currentIndex = items.indexOf(item);
+      lightbox.style.display = 'flex';
+      showImage(currentIndex);
+    });
+
+    function closeLightbox() { lightbox.style.display = 'none'; audioPlayer.pause(); }
+    closeBtn.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
+
+    function toggleDarkMode() {
+      const isDark = body.classList.toggle('dark-mode');
+      document.getElementById('darkBtn').innerHTML = isDark ? '&#9728;' : '&#9790;';
+    }
+
+    function toggleBW() {
+      lightboxImg.classList.toggle('bw-photo');
+      document.getElementById('bnBtn').textContent = lightboxImg.classList.contains('bw-photo') ? 'Color' : 'Blanco & Negro';
+    }
+
+    muteBtn.addEventListener('click', () => {
+      audioPlayer.muted = !audioPlayer.muted;
+      muteBtn.textContent = audioPlayer.muted ? '🔈' : '🔇';
+    });
+
+    // Likes
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const countSpan = btn.nextElementSibling;
+            let count = parseInt(countSpan.textContent);
+            if(btn.classList.toggle('liked')) {
+                countSpan.textContent = count + 1;
+                btn.innerHTML = '&#9829;';
+            } else {
+                countSpan.textContent = count - 1;
+                btn.innerHTML = '&#9825;';
+            }
+        });
+    });
+
+    // Teclado
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.style.display === 'flex') {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') showImage(currentIndex - 1);
+        if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+      }
+    });
+</script>
+</body>
+</html>
